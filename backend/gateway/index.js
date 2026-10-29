@@ -7,6 +7,7 @@ dotenv.config();
 import proxy from "express-http-proxy"
 import { getCurrentUser } from "./controller/user.controller.js";
 import { isAuth } from "./middleware/isAuth.js";
+import { proxyWithHeaders } from "./utils/proxyWithHeaders.js";
 
 const port = process.env.PORT;
 const app = express();
@@ -21,7 +22,7 @@ app.use(cookieParser());
 
 
 app.use("/api/auth",proxy(process.env.AUTH_SERVICE_URL));
-app.use("/api/resume",proxy(process.env.RESUME_SERVICE_URL));
+app.use("/api/resume",isAuth,proxyWithHeaders(process.env.RESUME_SERVICE_URL));
 app.get("/api/me",isAuth,getCurrentUser)
 
 
