@@ -5,6 +5,7 @@ export const isAuth = async (req, res, next) => {
   try {
     // Get session ID from cookie
     const sessionId = req.cookies?.session;
+    // console.log(sessionId,"....Hi")
 
     if (!sessionId) {
       return res.status(401).json({
@@ -42,6 +43,7 @@ export const isAuth = async (req, res, next) => {
 
     // Attach authenticated user to request
     req.user = user;
+    // console.log(user,"USER...")
 
     return next();
   } catch (error) {

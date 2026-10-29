@@ -12,7 +12,7 @@ import { setUserData } from "../redux/userSlice";
 
 
 
-const LoginModal = ({ isOpen, onClose }) => {
+const LoginModal = ({ isOpen, onClose,setUser }) => {
   const dispatch = useDispatch();
 
     const { userData } = useSelector((state) => state.user);
@@ -26,6 +26,7 @@ const LoginModal = ({ isOpen, onClose }) => {
 
     // Supports APIs returning either the user directly or { user, message }.
     dispatch(setUserData(data.user ?? data));
+    setUser(data?.user)
   };
 
   const googleLogin = async () => {
