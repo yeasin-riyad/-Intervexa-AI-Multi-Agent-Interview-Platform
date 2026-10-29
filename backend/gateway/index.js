@@ -21,7 +21,9 @@ app.use(cookieParser());
 
 
 app.use("/api/auth",proxy(process.env.AUTH_SERVICE_URL));
+app.use("/api/resume",proxy(process.env.RESUME_SERVICE_URL));
 app.get("/api/me",isAuth,getCurrentUser)
+
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Hello from api Gateway" });
