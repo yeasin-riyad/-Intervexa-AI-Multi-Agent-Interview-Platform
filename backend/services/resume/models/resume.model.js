@@ -6,6 +6,7 @@ const resumeSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      unique:true,
       index: true,
     },
 
@@ -48,7 +49,7 @@ const resumeSchema = new mongoose.Schema(
         default:[]
 
     },
-    
+
     skills:{
         type:[String],
         default:[]

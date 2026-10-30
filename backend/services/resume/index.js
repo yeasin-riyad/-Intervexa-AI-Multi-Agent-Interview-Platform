@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import connectDb from './config/db.js';
+import resumeRouter from './routes/resume.route.js';
 dotenv.config();
 
 const port = process.env.PORT;
@@ -10,6 +11,8 @@ app.use(express.json());
 app.get("/",(req,res)=>{
     res.status(200).json({message:"Hello from resume service"});
 })
+
+app.use("/",resumeRouter);
 
 
 
