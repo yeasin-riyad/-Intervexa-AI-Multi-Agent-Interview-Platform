@@ -1,17 +1,12 @@
-
 import { useCallback, useEffect, useState } from "react";
-import {
-  Navigate,
-  Route,
-  Routes,
-} from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import Home from "./pages/Home";
 import DashboardLayout from "./pages/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import ResumeAnalysis from "./components/resume/ResumeAnalysis";
 import { getCurrentUser } from "../utils/getMe";
-
+import ResumeBuilder from "./pages/ResumeBuilder";
 
 // Protected Route
 const ProtectedRoute = ({ user, children }) => {
@@ -26,9 +21,7 @@ const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center bg-[#080B14] text-white">
     <div className="flex flex-col items-center gap-4">
       <div className="h-12 w-12 animate-spin rounded-full border-4 border-violet-500/20 border-t-violet-500" />
-      <p className="text-sm text-gray-400">
-        Loading your account...
-      </p>
+      <p className="text-sm text-gray-400">Loading your account...</p>
     </div>
   </div>
 );
@@ -57,10 +50,7 @@ const App = () => {
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={<Home user={user} setUser={setUser} />}
-      />
+      <Route path="/" element={<Home user={user} setUser={setUser} />} />
 
       {/* Protected Dashboard Layout */}
       <Route
@@ -70,23 +60,16 @@ const App = () => {
           </ProtectedRoute>
         }
       >
-        <Route
-          path="/dashboard"
-          element={<Dashboard user={user} />}
-        />
+        <Route path="/dashboard" element={<Dashboard user={user} />} />
 
-        <Route
-          path="/resume"
-          element={<ResumeAnalysis />}
-        />
+        <Route path="/resume" element={<ResumeAnalysis />} />
+
+        <Route path="/resume-builder" element={<ResumeBuilder />} />
 
         {/* Add other dashboard pages here */}
       </Route>
 
-      <Route
-        path="*"
-        element={<Navigate to="/" replace />}
-      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

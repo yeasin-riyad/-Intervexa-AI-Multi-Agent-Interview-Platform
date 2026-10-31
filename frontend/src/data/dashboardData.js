@@ -34,6 +34,7 @@ export const dashboardStats = [
 export const dashboardAgents = [
   {
     label: "Resume Builder",
+    path: "/resume-builder",
     icon: HiOutlineDocumentText,
   },
   {
@@ -42,6 +43,7 @@ export const dashboardAgents = [
   },
   {
     label: "Resume Scorer",
+    path: "/resume",
     icon: HiOutlineStar,
   },
 ];
