@@ -1,8 +1,12 @@
 import { ChatGroq } from "@langchain/groq";
-import { HumanMessage } from "@langchain/core/messages";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const llm = new ChatGroq({
-  model: "llama-3.3-70b-versatile",
+  apiKey: process.env.GROQ_API_KEY,
+  model: "openai/gpt-oss-120b",
+  temperature: 0,
 });
 
 export default llm;
