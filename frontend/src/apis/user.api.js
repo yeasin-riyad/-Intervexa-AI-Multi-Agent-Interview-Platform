@@ -11,3 +11,16 @@ export const currentUser= async()=>{
         
     }
 }
+
+
+export const deductCoins= async({ coins, action })=>{
+    try {
+        const response= await api.post("/api/auth/use-coins",{ coins, action });
+        return response.data;
+        
+    } catch (error) {
+        return null;
+        
+    }
+
+}

@@ -60,7 +60,7 @@ const App = () => {
           </ProtectedRoute>
         }
       >
-        <Route path="/dashboard" element={<Dashboard user={user} />} />
+        <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser}/>} />
 
         <Route path="/resume" element={<ResumeAnalysis />} />
 

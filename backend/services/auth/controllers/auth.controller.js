@@ -103,3 +103,110 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+
+
+
+export const useCoins = async (req, res) => {
+  try {
+    // Get session ID from cookies
+    const sessionId = req.cookies?.session;
+
+    if (!sessionId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Please login first.",
+      });
+    }
+
+    // Get session from Redis
+    const session = await redis.get(`session:${sessionId}`);
+
+    if (!session) {
+      return res.status(401).json({
+        success: false,
+        message: "Session expired. Please login again.",
+      });
+    }
+
+    // Parse session data
+    const sessionData = JSON.parse(session);
+
+    // Get coins and action from request body
+    const { coins, action } = req.body;
+
+    // Validate coin amount
+    if (!Number.isSafeInteger(coins) || coins <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid coin amount.",
+      });
+    }
+
+    // Validate action
+    if (!action || typeof action !== "string" || !action.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Action is required.",
+      });
+    }
+
+    // Find user
+    const user = await User.findById(sessionData.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // Check available coins
+    if (user.interviewCoin < coins) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient interview coins.",
+        requiredCoins: coins,
+        availableCoins: user.interviewCoin,
+      });
+    }
+
+    // Deduct coins
+    user.interviewCoin -= coins;
+    await user.save();
+
+    // Update Redis session
+    const updatedSessionData = {
+      userId: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      interviewCoin: user.interviewCoin,
+    };
+
+    await redis.set(
+      `session:${sessionId}`,
+      JSON.stringify(updatedSessionData),
+      "EX",
+      SESSION_TTL
+    );
+
+    // Success response
+    return res.status(200).json({
+      success: true,
+      message: `${coins} interview coins deducted successfully.`,
+      action: action.trim(),
+      coinsUsed: coins,
+      remainingCoins: user.interviewCoin,
+      user: updatedSessionData,
+    });
+
+  } catch (error) {
+    console.error("Use Coins Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while deducting coins.",
+    });
+  }
+};

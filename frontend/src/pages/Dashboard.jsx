@@ -8,6 +8,7 @@ import ResumeUploadModal from "../components/dashboard/ResumeUploadModal";
 import ResumeAnalysis from "../components/resume/ResumeAnalysis";
 
 import { uploadResume } from "../redux/resumeSlice";
+import { deductCoins } from "../apis/user.api";
 
 const Dashboard = ({ user, setUser }) => {
   const dispatch = useDispatch();
@@ -25,6 +26,12 @@ const Dashboard = ({ user, setUser }) => {
       const result = await dispatch(
         uploadResume(file)
       ).unwrap();
+      const coinResponse= await deductCoins({coins:10,action:"resume-scorer"});
+      setUser((prev)=>({
+        ...prev,
+        interviewCoin:coinResponse?.interviewCoin
+      }))
+
 
       setIsResumeModalOpen(false);
       setActivePage("resume");
