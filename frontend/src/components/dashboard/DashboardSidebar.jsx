@@ -16,7 +16,6 @@ import {
 import { dashboardAgents, demoUser } from "../../data/dashboardData";
 
 import UserProfile from "./UserProfile";
-import ResumeUploadModal from "./ResumeUploadModal";
 
 import {
   fetchResume,
@@ -35,9 +34,7 @@ const DashboardSidebar = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { isAnalyzing } = useSelector(
-    (state) => state.resume
-  );
+
 
  
 
