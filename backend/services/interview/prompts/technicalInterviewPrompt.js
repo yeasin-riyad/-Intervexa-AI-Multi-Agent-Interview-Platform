@@ -307,3 +307,6 @@ No extra text.
 ;
     `;
 };
+
+
+export default technicalInterviewPrompt;
