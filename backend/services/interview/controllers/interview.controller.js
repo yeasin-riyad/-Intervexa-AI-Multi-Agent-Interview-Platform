@@ -1,0 +1,136 @@
+import graph from "../graph/graph";
+import Interview from "../models/interview.model";
+
+export const startInterview = async (req, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+    const { type, role, useResume = false, resume = {} } = req.body;
+    if (!type && !role) {
+    }
+
+    const result = await graph.invoke({
+      action: "start",
+      role,
+      type,
+      useResume,
+      resume,
+    });
+
+    const questions = result.questions;
+    if (!questions || questions.length === 0) {
+    }
+
+    const interview = await Interview.create({
+      userId,
+      type,
+      role,
+      useResume,
+      questions,
+      currentQuestion: 0,
+      status: "in-progress",
+    });
+
+    return rs.status(200).json({
+      success: true,
+      interviewId: interview._id,
+      currentQuestion: 0,
+      totalQuestions: interview.questions.length,
+      question: interview.questions[0],
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status();
+  }
+};
+
+export const submitAnswer = async (req, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+
+    const { interviewId, answer } = req.body;
+    if (!interviewId && !answer) {
+    }
+
+    const interview = await Interview.findOne({
+      _id: interviewId,
+      userId,
+    });
+    if (!interview) {
+    }
+
+    if (interview.status === "completed") {
+    }
+
+    const index = interview.currentQuestion;
+    const currentQuestion = interview.questions[index];
+
+    if (!currentQuestion) {
+    }
+
+    currentQuestion.userAnswer = answer;
+    const completed =
+      interview.currentQuestion + 1 >= interview.questions.length;
+
+    const result = await graph.invoke({
+      action: "feedback",
+      question: currentQuestion.question,
+      answer,
+      difficulty: currentQuestion.difficulty,
+      completed,
+      role: interview.role,
+      type: interview.type,
+      questions: interview.questions,
+    });
+
+    currentQuestion.feedback = result.feedback;
+    interview.currentQuestion++;
+
+    if (completed) {
+      interview.status = "completed";
+      interview.overallScore = result.report.overallScore;
+      interview.summary = result.report.summary;
+      interview.strengths = result.report.strengths;
+      interview.weaknesses = result.report.weaknesses;
+      interview.recommendations = result.report.recommendations;
+      await interview.save();
+      return res.status(200).json({
+        success: true,
+        completed: true,
+        interview,
+      });
+    }
+
+    await interview.save();
+    return res.status(200).josn({
+        success:true,
+        completed:false,
+        currentQuestion:interview.currentQuestion,
+        question:interview.questions[interview.currentQuestion],
+        feedback:result.feedback
+    })
+  } catch (error) {}
+};
+
+
+export const getInterview= async(req,res)=>{
+    try {
+        const userId = req.headers["x-user-id"];
+        const {id}= req.params;
+
+        const interview= await Interview.findOne({
+            _id:id,
+            userId
+        })
+        if(!interview){
+
+        }
+
+        return res.status(200).json({
+            success:true,
+            interview
+        })
+        
+    } catch (error) {
+        
+    }
+}
