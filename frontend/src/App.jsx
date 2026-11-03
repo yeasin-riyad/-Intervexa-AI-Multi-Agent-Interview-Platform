@@ -7,6 +7,9 @@ import Dashboard from "./pages/Dashboard";
 import ResumeAnalysis from "./components/resume/ResumeAnalysis";
 import { getCurrentUser } from "../utils/getMe";
 import ResumeBuilder from "./pages/ResumeBuilder";
+import InterviewStart from "./pages/InterviewStart";
+import InterviewPage from "./pages/InterviewPage";
+import InterviewReport from "./pages/InterviewReport";
 
 // Protected Route
 const ProtectedRoute = ({ user, children }) => {
@@ -65,6 +68,13 @@ const App = () => {
         <Route path="/resume" element={<ResumeAnalysis />} />
 
         <Route path="/resume-builder" element={<ResumeBuilder />} />
+
+         <Route path="/interview" element={<InterviewStart user={user} setUser={setUser}/>} />
+         <Route path="/interview/:id" element={<InterviewPage user={user} setUser={setUser}/>} />
+         <Route path="/interview/:id/report" element={<InterviewReport user={user} setUser={setUser}/>} />
+
+
+
 
         {/* Add other dashboard pages here */}
       </Route>
