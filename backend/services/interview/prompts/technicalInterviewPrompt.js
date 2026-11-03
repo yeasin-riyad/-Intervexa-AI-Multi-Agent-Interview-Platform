@@ -1,5 +1,5 @@
 const technicalInterviewPrompt = ({ role, useResume, resume }) => {
-  `
+ return  `
     You are a Senior Technical Interviewer.
 
 Generate realistic technical interview questions.

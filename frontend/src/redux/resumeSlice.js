@@ -8,7 +8,6 @@ export const fetchResume = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const { data } = await api.get("/api/resume/get-resume");
-      console.log(data,"Data..")
       return data.data;
     } catch (error) {
       return rejectWithValue({

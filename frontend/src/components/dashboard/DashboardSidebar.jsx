@@ -19,7 +19,6 @@ import UserProfile from "./UserProfile";
 
 import {
   fetchResume,
-  uploadResume,
 } from "../../redux/resumeSlice";
 
 const DashboardSidebar = ({
@@ -34,9 +33,6 @@ const DashboardSidebar = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-
-
- 
 
   // Navigation items
   const navigation = [
@@ -85,23 +81,7 @@ const DashboardSidebar = ({
     }
   };
 
-  // Upload and analyze resume
-  const handleResumeAnalyze = async (file) => {
-    try {
-      await dispatch(uploadResume(file)).unwrap();
 
-      navigate("/resume");
-
-      onClose?.();
-
-    } catch (error) {
-      console.error("Resume analysis failed:", error);
-
-      throw new Error(
-        error?.message || "Resume analysis failed."
-      );
-    }
-  };
 
   // Handle sidebar navigation
   const handleNavigation = (item) => {

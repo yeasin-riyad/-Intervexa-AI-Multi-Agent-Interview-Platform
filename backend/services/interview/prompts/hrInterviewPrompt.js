@@ -1,5 +1,5 @@
 const hrInterviewPrompt = ({ role, useResume, resume }) => {
-  `
+ return `
     You are a Senior HR Interviewer with 15+ years of experience.
 
 Generate realistic HR interview questions.
