@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 import graph from "../graph/graph.js";
 import Interview from "../models/interview.model.js";

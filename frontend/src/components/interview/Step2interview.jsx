@@ -85,8 +85,7 @@ const Step2interview = ({ interviewData, user, onSubmitAnswer }) => {
   const warningPlayedRef = useRef(false);
   const submitLockRef = useRef(false);
 
-  const videoSource =
-    voiceGender === "female" ? femaleVideo : maleVideo;
+  const videoSource = voiceGender === "female" ? femaleVideo : maleVideo;
   const candidateName = user?.name || "Candidate";
   const totalQuestions = questions.length || 1;
 
@@ -116,8 +115,7 @@ const Step2interview = ({ interviewData, user, onSubmitAnswer }) => {
   const circumference = 2 * Math.PI * 44;
   const timerProgress =
     timerDuration > 0 ? (timeLeft / timerDuration) * 100 : 0;
-  const strokeOffset =
-    circumference - (timerProgress / 100) * circumference;
+  const strokeOffset = circumference - (timerProgress / 100) * circumference;
 
   // =========================================
   // AI VOICE
@@ -258,8 +256,10 @@ const Step2interview = ({ interviewData, user, onSubmitAnswer }) => {
 
         setTimeout(() => {
           navigate(
-            `/interview/${interviewData?._id || interviewData?.interviewId}/report`,
-            { replace: true },
+            `/interview/${interviewData?._id}/report`,
+            {
+              replace: true,
+            },
           );
         }, 2000);
         return;
@@ -310,8 +310,7 @@ const Step2interview = ({ interviewData, user, onSubmitAnswer }) => {
 
       // ⬇️ পরের প্রশ্ন state-এ রাখি — কিন্তু show করি না, Next বাটনে ক্লিক করলে
       if (result.question) {
-        const nextIndex =
-          result.currentQuestion ?? currentIndexRef.current + 1;
+        const nextIndex = result.currentQuestion ?? currentIndexRef.current + 1;
 
         setPendingNext({
           question: result.question,
@@ -576,7 +575,11 @@ const Step2interview = ({ interviewData, user, onSubmitAnswer }) => {
               title={cameraOn ? "Turn off camera" : "Turn on camera"}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-base bg-[#252731] text-gray-300 hover:bg-[#323541]"
             >
-              {cameraOn ? <HiOutlineVideoCamera /> : <HiOutlineVideoCameraSlash />}
+              {cameraOn ? (
+                <HiOutlineVideoCamera />
+              ) : (
+                <HiOutlineVideoCameraSlash />
+              )}
             </button>
             <button
               type="button"
@@ -596,16 +599,23 @@ const Step2interview = ({ interviewData, user, onSubmitAnswer }) => {
               title={`Switch to ${voiceGender === "female" ? "male" : "female"} AI`}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-base bg-[#252731] text-white hover:bg-[#323541]"
             >
-              {voiceGender === "female" ? <HiOutlineUserCircle /> : <HiOutlineUser />}
+              {voiceGender === "female" ? (
+                <HiOutlineUserCircle />
+              ) : (
+                <HiOutlineUser />
+              )}
             </button>
           </div>
 
           <div className="text-center space-y-1 shrink-0">
-            <p className={`text-[10px] font-medium ${micOn ? "text-emerald-400" : "text-red-400"}`}>
+            <p
+              className={`text-[10px] font-medium ${micOn ? "text-emerald-400" : "text-red-400"}`}
+            >
               {micOn ? "Microphone active" : "Microphone paused"}
             </p>
             <p className="text-[10px] text-gray-500">
-              AI voice: <span className="capitalize text-gray-300">{voiceGender}</span>
+              AI voice:{" "}
+              <span className="capitalize text-gray-300">{voiceGender}</span>
             </p>
           </div>
         </div>
@@ -624,7 +634,14 @@ const Step2interview = ({ interviewData, user, onSubmitAnswer }) => {
             </div>
             <div className="relative w-[60px] h-[60px] sm:w-[72px] sm:h-[72px] shrink-0">
               <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                <circle cx="50" cy="50" r="44" stroke="#292b35" strokeWidth="7" fill="none" />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="44"
+                  stroke="#292b35"
+                  strokeWidth="7"
+                  fill="none"
+                />
                 <circle
                   cx="50"
                   cy="50"
@@ -657,7 +674,9 @@ const Step2interview = ({ interviewData, user, onSubmitAnswer }) => {
                 <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-[#111217]">
                   <HiOutlineChatBubbleLeftRight className="text-sm" />
                 </div>
-                <p className="text-xs text-gray-400">Question {currentIndex + 1}</p>
+                <p className="text-xs text-gray-400">
+                  Question {currentIndex + 1}
+                </p>
               </div>
               <h2 className="text-sm sm:text-base leading-relaxed font-medium">
                 {questionText}
@@ -686,7 +705,9 @@ const Step2interview = ({ interviewData, user, onSubmitAnswer }) => {
 
             {/* Answer */}
             <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-gray-300">Your Answer</label>
+              <label className="text-xs font-medium text-gray-300">
+                Your Answer
+              </label>
               {micOn && (
                 <span className="flex items-center gap-1 text-[10px] text-emerald-400">
                   <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
