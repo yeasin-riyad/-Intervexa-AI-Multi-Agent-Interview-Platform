@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
@@ -7,7 +6,7 @@ import DashboardLayout from "./pages/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import ResumeAnalysis from "./components/resume/ResumeAnalysis";
 import ResumeBuilder from "./pages/ResumeBuilder";
-import InterviewStart from "./pages/InterviewStart";
+// import InterviewStart from "./pages/InterviewStart";
 import InterviewPage from "./pages/InterviewPage";
 import InterviewReport from "./pages/InterviewReport";
 
@@ -80,7 +79,6 @@ const App = () => {
                     </ProtectedRoute>
                 }
             >
-
                 {/* Dashboard */}
                 <Route
                     path="/dashboard"
@@ -97,24 +95,26 @@ const App = () => {
                     path="/resume-builder"
                     element={<ResumeBuilder />}
                 />
-
-                {/* Interview */}
-                <Route
-                    path="/interview"
-                    element={<InterviewStart user={user} />}
-                />
-
-                <Route
-                    path="/interview/:id"
-                    element={<InterviewPage user={user} />}
-                />
-
-                <Route
-                    path="/interview/:id/report"
-                    element={<InterviewReport user={user} />}
-                />
-
             </Route>
+
+            {/* Protected Interview Routes (outside DashboardLayout) */}
+            <Route
+                path="/interview/:id"
+                element={
+                    <ProtectedRoute user={user}>
+                        <InterviewPage user={user} />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/interview/:id/report"
+                element={
+                    <ProtectedRoute user={user}>
+                        <InterviewReport user={user} />
+                    </ProtectedRoute>
+                }
+            />
 
             {/* Not Found */}
             <Route

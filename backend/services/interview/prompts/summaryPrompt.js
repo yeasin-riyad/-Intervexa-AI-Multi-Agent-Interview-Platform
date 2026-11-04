@@ -1,5 +1,5 @@
 const summaryPrompt = ({ type, role, questions }) => {
-  `
+  return `
     You are an expert technical interviewer and hiring manager.
 
 Analyze the complete interview.

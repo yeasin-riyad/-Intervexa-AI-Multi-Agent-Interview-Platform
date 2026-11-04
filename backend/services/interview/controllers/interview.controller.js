@@ -106,7 +106,7 @@ export const submitAnswer = async (req, res) => {
   try {
     const userId = req.headers["x-user-id"];
 
-    const { interviewId, answer } = req.body;
+    const { interviewId, answer, autoSubmitted = false } = req.body;
 
     // Validate authenticated user
     if (!userId || !mongoose.isValidObjectId(userId)) {
@@ -124,12 +124,19 @@ export const submitAnswer = async (req, res) => {
       });
     }
 
-    if (typeof answer !== "string" || !answer.trim()) {
+    if (typeof answer !== "string") {
       return res.status(400).json({
         success: false,
-        message: "Please provide your answer.",
+        message: "Answer must be a string.",
       });
     }
+
+    if (!autoSubmitted && !answer.trim()) {
+    return res.status(400).json({
+        success: false,
+        message: "Please provide your answer.",
+    });
+}
 
     // Find interview belonging to this user
     const interview = await Interview.findOne({
