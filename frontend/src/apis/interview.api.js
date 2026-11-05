@@ -66,3 +66,30 @@ export const submitAnswerApi = async (payload) => {
         };
     }
 };
+
+export const getAllInterview = async (params = {}) => {
+  try {
+    const response = await api.get("/api/interview/all-interviews", { params });
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Get Interview API Error:",
+      error.response?.data || error
+    );
+
+    return {
+      success: false,
+      message:
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to fetch interviews.",
+      interviews: [],
+      total: 0,
+      page: 1,
+      limit: 10,
+      totalPages: 1,
+    };
+  }
+};

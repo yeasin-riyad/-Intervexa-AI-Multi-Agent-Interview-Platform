@@ -1,4 +1,3 @@
-import { response } from "express";
 import llm from "../config/llm.js";
 import hrInterviewPrompt from "../prompts/hrInterviewPrompt.js"
 import technicalInterviewPrompt from "../prompts/technicalInterviewPrompt.js"
@@ -13,7 +12,6 @@ export const interviewAgent= async(data)=>{
             return JSON.parse(cleaned);
     } catch (error) {
         console.log("Interview Agent Parse Error");
-        console.log(response.content);
         console.log(error,"Error");
         throw new Error("Failed to generate interview questions");
         

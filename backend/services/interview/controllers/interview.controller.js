@@ -302,3 +302,103 @@ export const getInterview = async (req, res) => {
     });
   }
 };
+
+
+// Get all interviews for the logged-in user
+export const getAllInterviews = async (req, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+
+    // Validate authenticated user
+    if (!userId || !mongoose.isValidObjectId(userId)) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Please login first.",
+      });
+    }
+
+    // Query params
+    const {
+      status,          
+      type,            
+      page = 1,
+      limit = 10,
+      sort = "-createdAt", 
+    } = req.query;
+
+    // Build filter
+    const filter = { userId };
+
+    if (status) {
+      if (!["in-progress", "completed"].includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status. Use 'in-progress' or 'completed'.",
+        });
+      }
+      filter.status = status;
+    }
+
+    if (type) {
+      if (!["hr", "technical"].includes(type)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid type. Use 'hr' or 'technical'.",
+        });
+      }
+      filter.type = type;
+    }
+
+    // Pagination
+    const pageNumber = Math.max(parseInt(page, 10) || 1, 1);
+    const limitNumber = Math.min(
+      Math.max(parseInt(limit, 10) || 10, 1),
+      100
+    );
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Fetch interviews + total count in parallel
+    const [interviews, total] = await Promise.all([
+      Interview.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limitNumber)
+        .select(
+          "type role status currentQuestion overallScore createdAt updatedAt questions"
+        )
+        .lean(),
+      Interview.countDocuments(filter),
+    ]);
+
+    // Add computed summary fields to each interview
+    const formatted = interviews.map((item) => ({
+      _id: item._id,
+      type: item.type,
+      role: item.role,
+      status: item.status,
+      currentQuestion: item.currentQuestion,
+      totalQuestions: item.questions?.length || 0,
+      overallScore: item.overallScore || 0,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      message: "Interviews fetched successfully.",
+      count: formatted.length,
+      total,
+      page: pageNumber,
+      limit: limitNumber,
+      totalPages: Math.ceil(total / limitNumber) || 1,
+      interviews: formatted,
+    });
+  } catch (error) {
+    console.error("Get All Interviews Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve interviews. Please try again.",
+    });
+  }
+};

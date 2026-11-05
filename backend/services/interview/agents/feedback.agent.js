@@ -1,4 +1,3 @@
-import { response } from "express";
 import llm from "../config/llm.js";
 import feedbackPrompt from "../prompts/feedbackPrompt.js";
 
@@ -12,8 +11,7 @@ export const feedbackAgent= async(data)=>{
             const cleaned= response.content.replace(/```json/g,"").replace(/```/g,"").trim();
             return JSON.parse(cleaned);
     } catch (error) {
-        console.log("Feedback Agent Parse Error");
-        console.log(response.content);
+        console.log(error,"Feedback Agent Parse Error");
         throw new Error("Failed to generate feedback");
         
     }
