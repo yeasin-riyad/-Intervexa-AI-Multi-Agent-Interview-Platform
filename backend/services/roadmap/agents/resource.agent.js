@@ -1,6 +1,7 @@
 
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import llm from "../config/llm.js";
+import searchVideo from "../config/youtube.js";
 
 const resourceAgent = async (state) => {
   try {
@@ -10,10 +11,12 @@ const resourceAgent = async (state) => {
       throw new Error("Roadmap not found.");
     }
 
+    // Extract all module titles
     const moduleTitles = roadmap.modules
       .map((module) => module.title)
       .join("\n");
 
+    // Search documentation using LLM
     const docResponse = await llm.invoke([
       new SystemMessage(`
         You are an expert software engineer and technical learning resource researcher.
@@ -59,32 +62,40 @@ const resourceAgent = async (state) => {
       throw new Error("LLM returned an empty documentation response.");
     }
 
-    // Remove Markdown JSON code blocks
+    // Clean Markdown JSON code blocks
     const cleanedContent = content
       .replace(/^```(?:json)?\s*/i, "")
       .replace(/\s*```$/, "")
       .trim();
 
-    // Parse JSON response
-    let docs = JSON.parse(cleanedContent);
+    // Parse documentation response
+    const docs = JSON.parse(cleanedContent);
 
     if (!Array.isArray(docs)) {
       throw new Error("Invalid documentation response format.");
     }
 
-    // Match documentation with original roadmap modules
-    const updatedModules = roadmap.modules.map((module) => {
-      const resource = docs.find(
-        (doc) =>
-          doc.title?.trim().toLowerCase() ===
-          module.title.trim().toLowerCase()
-      );
+    // Attach documentation and YouTube videos
+    const updatedModules = await Promise.all(
+      roadmap.modules.map(async (module) => {
 
-      return {
-        ...module,
-        article: resource?.article || "",
-      };
-    });
+        // Find matching documentation
+        const resource = docs.find(
+          (doc) =>
+            doc.title?.trim().toLowerCase() ===
+            module.title.trim().toLowerCase()
+        );
+
+        // Search YouTube video for this module
+        const youtube = await searchVideo(module.title);
+
+        return {
+          ...module,
+          article: resource?.article || "",
+          youtube,
+        };
+      })
+    );
 
     return {
       roadmap: {

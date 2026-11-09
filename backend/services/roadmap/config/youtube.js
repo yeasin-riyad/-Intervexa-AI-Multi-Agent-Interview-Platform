@@ -3,12 +3,37 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import axios from "axios";
+import redis from "../../../shared/redis/redis.js";
 
 const YOUTUBE_API_URL =
   "https://www.googleapis.com/youtube/v3/search";
 
+const CACHE_TTL = 7 * 24 * 60 * 60; // 7 days
+
 const searchVideo = async (topic) => {
   try {
+    // Normalize topic to generate a consistent cache key
+    const normalizedTopic = topic.trim().toLowerCase();
+
+    const cacheKey = `youtube:video:v1:${encodeURIComponent(normalizedTopic)}`;
+
+    // 1. Check Redis cache first
+    try {
+      const cachedVideo = await redis.get(cacheKey);
+
+      if (cachedVideo) {
+        console.log("YouTube Cache Hit:", topic);
+
+        return JSON.parse(cachedVideo);
+      }
+    } catch (cacheError) {
+      console.error("Redis Cache Read Error:", cacheError.message);
+      // Continue with YouTube API if Redis fails
+    }
+
+    console.log("YouTube Cache Miss:", topic);
+
+    // 2. Search video using YouTube API
     const { data } = await axios.get(YOUTUBE_API_URL, {
       params: {
         key: process.env.YOUTUBE_API_KEY,
@@ -26,7 +51,7 @@ const searchVideo = async (topic) => {
       return null;
     }
 
-    // Prefer FreeCodeCamp video
+    // 3. Prefer FreeCodeCamp video
     const freeCodeCampVideo = videos.find((video) =>
       video.snippet.channelTitle
         .toLowerCase()
@@ -36,13 +61,30 @@ const searchVideo = async (topic) => {
     // Otherwise, select the first available video
     const selectedVideo = freeCodeCampVideo || videos[0];
 
-    return {
+    const videoResult = {
       title: selectedVideo.snippet.title,
       channel: selectedVideo.snippet.channelTitle,
       url: `https://www.youtube.com/watch?v=${selectedVideo.id.videoId}`,
       thumbnail:
         selectedVideo.snippet.thumbnails?.high?.url || "",
     };
+
+    // 4. Save result in Redis for 7 days
+    try {
+      await redis.set(
+        cacheKey,
+        JSON.stringify(videoResult),
+        "EX",
+        CACHE_TTL
+      );
+
+      console.log("YouTube Video Cached:", topic);
+    } catch (cacheError) {
+      console.error("Redis Cache Write Error:", cacheError.message);
+      // Return video even if caching fails
+    }
+
+    return videoResult;
 
   } catch (error) {
     console.error(
