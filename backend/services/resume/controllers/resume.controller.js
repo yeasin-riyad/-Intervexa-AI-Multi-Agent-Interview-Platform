@@ -104,6 +104,8 @@ export const getResume = async (req, res) => {
     // 1. Get user ID from API Gateway
     const userId = req.headers["x-user-id"];
 
+    console.log(userId,"UserId...")
+
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json({
         success: false,

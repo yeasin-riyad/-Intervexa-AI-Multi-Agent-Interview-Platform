@@ -1,10 +1,17 @@
-
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import llm from "../config/llm.js";
 import searchVideo from "../config/youtube.js";
 
 const resourceAgent = async (state) => {
   try {
+    // Check previous agent error
+    if (state.error) {
+      return {
+        roadmap: null,
+        error: state.error,
+      };
+    }
+
     const roadmap = state.roadmap;
 
     if (!roadmap || !Array.isArray(roadmap.modules)) {
@@ -53,9 +60,7 @@ const resourceAgent = async (state) => {
     let content = docResponse.content;
 
     if (Array.isArray(content)) {
-      content = content
-        .map((item) => item.text || "")
-        .join("");
+      content = content.map((item) => item.text || "").join("");
     }
 
     if (!content || typeof content !== "string") {
@@ -78,12 +83,11 @@ const resourceAgent = async (state) => {
     // Attach documentation and YouTube videos
     const updatedModules = await Promise.all(
       roadmap.modules.map(async (module) => {
-
         // Find matching documentation
         const resource = docs.find(
           (doc) =>
             doc.title?.trim().toLowerCase() ===
-            module.title.trim().toLowerCase()
+            module.title.trim().toLowerCase(),
         );
 
         // Search YouTube video for this module
@@ -94,7 +98,7 @@ const resourceAgent = async (state) => {
           article: resource?.article || "",
           youtube,
         };
-      })
+      }),
     );
 
     return {
@@ -104,7 +108,6 @@ const resourceAgent = async (state) => {
       },
       error: null,
     };
-
   } catch (error) {
     console.error("Resource Agent Error:", error);
 

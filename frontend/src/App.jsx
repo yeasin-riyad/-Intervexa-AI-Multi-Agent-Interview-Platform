@@ -11,6 +11,7 @@ import InterviewPage from "./pages/InterviewPage";
 import InterviewReport from "./pages/InterviewReport";
 
 import { getCurrentUser } from "../utils/getMe";
+import Roadmap from "./pages/Roadmap";
 
 // Protected Route
 const ProtectedRoute = ({ user, children }) => {
@@ -94,6 +95,11 @@ const App = () => {
                 <Route
                     path="/resume-builder"
                     element={<ResumeBuilder />}
+                />
+
+                <Route
+                    path="/roadmap"
+                    element={<Roadmap />}
                 />
             </Route>
 

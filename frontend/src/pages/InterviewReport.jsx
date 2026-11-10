@@ -8,6 +8,7 @@ import { getInterview } from "../apis/interview.api";
 
 const InterviewReport = ({ user, setUser }) => {
   const { id } = useParams();
+  console.log(id,"Id..")
   const navigate = useNavigate();
 
   const [interviewData, setInterviewData] = useState(null);

@@ -30,7 +30,6 @@ export const startInterviewApi = async (payload) => {
 export const getInterview = async (interviewId) => {
   try {
     const response = await api.get(`/api/interview/${interviewId}`);
-
     return response.data;
   } catch (error) {
     console.error(

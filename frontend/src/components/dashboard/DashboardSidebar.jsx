@@ -1,7 +1,6 @@
 
-import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import {
@@ -17,9 +16,7 @@ import { dashboardAgents, demoUser } from "../../data/dashboardData";
 
 import UserProfile from "./UserProfile";
 
-import {
-  fetchResume,
-} from "../../redux/resumeSlice";
+import { fetchResume } from "../../redux/resumeSlice";
 
 const DashboardSidebar = ({
   user,
@@ -33,7 +30,6 @@ const DashboardSidebar = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-
   // Navigation items
   const navigation = [
     {
@@ -41,13 +37,23 @@ const DashboardSidebar = ({
       icon: HiOutlineSquares2X2,
       path: "/dashboard",
     },
-    ...dashboardAgents.map((item) => ({
-      ...item,
-      path:
+
+    ...dashboardAgents.map((item) => {
+      let path =
         item.path ||
         item.page ||
-        `/${item.label.toLowerCase().replace(/\s+/g, "-")}`,
-    })),
+        `/${item.label.toLowerCase().replace(/\s+/g, "-")}`;
+
+      // Roadmap route according to App.jsx
+      if (item.label.toLowerCase().includes("roadmap")) {
+        path = "/roadmap";
+      }
+
+      return {
+        ...item,
+        path,
+      };
+    }),
   ];
 
   // Close mobile sidebar and navigate
@@ -62,7 +68,6 @@ const DashboardSidebar = ({
       await dispatch(fetchResume()).unwrap();
 
       navigateTo("/resume");
-
     } catch (error) {
       const status =
         error?.status ||
@@ -81,8 +86,6 @@ const DashboardSidebar = ({
     }
   };
 
-
-
   // Handle sidebar navigation
   const handleNavigation = (item) => {
     if (
@@ -98,6 +101,12 @@ const DashboardSidebar = ({
 
   // Active route detection
   const isActiveRoute = (path) => {
+    // Dashboard should only be active on exact match
+    if (path === "/dashboard") {
+      return location.pathname === "/dashboard";
+    }
+
+    // Other routes support nested pages
     return (
       location.pathname === path ||
       location.pathname.startsWith(`${path}/`)
@@ -170,9 +179,7 @@ const DashboardSidebar = ({
               item.label === "Resume Scorer" ||
               item.path === "/resume";
 
-            const isActive = isResume
-              ? isActiveRoute("/resume")
-              : isActiveRoute(item.path);
+            const isActive = isActiveRoute(item.path);
 
             return (
               <button
@@ -313,7 +320,6 @@ const DashboardSidebar = ({
           </>
         )}
       </AnimatePresence>
-
     </>
   );
 };

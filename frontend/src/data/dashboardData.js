@@ -40,6 +40,7 @@ export const dashboardAgents = [
   {
     label: "Roadmap Builder",
     icon: HiOutlineMap,
+    path: "/roadmap",
   },
   {
     label: "Resume Scorer",
@@ -80,8 +81,8 @@ export const interviewCategories = [
 ];
 
 export const demoUser = {
-  name: "Ankush Sahu",
-  email: "ankush25102002@gmail.com",
+  name: "Yeasin Riyad",
+  email: "mazumderyeasin9812@gmail.com",
   initials: "AS",
   interviewCoins: 3590,
 };

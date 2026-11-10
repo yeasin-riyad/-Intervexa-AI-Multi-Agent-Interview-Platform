@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import connectDb from './config/db.js';
+import roadmapRouter from './routes/roadmap.route.js';
 dotenv.config();
 
 const port = process.env.PORT;
@@ -11,6 +12,8 @@ app.get("/",(req,res)=>{
     res.status(200).json({message:"Hello from roadmap service"});
 })
 
+
+app.use("/",roadmapRouter);
 
 
 
