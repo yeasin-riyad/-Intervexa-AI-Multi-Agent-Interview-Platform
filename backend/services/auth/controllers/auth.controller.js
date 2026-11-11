@@ -208,3 +208,73 @@ export const useCoins = async (req, res) => {
     });
   }
 };
+
+
+
+export const demoLogin = async (req, res) => {
+  try {
+    // Find the predefined demo account
+    let user = await User.findOne({
+      firebaseUid:process.env.FIREBASEUID,
+    });
+
+    // Create demo account if it doesn't exist
+    if (!user) {
+      user = await User.create({
+        firebaseUid:process.env.FIREBASEUID,
+        name: "Demo User",
+        email: "demo@intervexa.ai",
+        avatar: "",
+        interviewCoin: 150,
+      });
+    }
+
+    // Generate a new session for this visitor
+    const sessionId = crypto.randomUUID();
+
+    const sessionData = {
+      userId: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      interviewCoin: user.interviewCoin,
+      isDemo: true,
+    };
+
+    // Store session in Redis
+    await redis.set(
+      `session:${sessionId}`,
+      JSON.stringify(sessionData),
+      "EX",
+      SESSION_TTL
+    );
+
+    // Set HTTP-only cookie
+    res.cookie("session", sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: SESSION_TTL * 1000,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Demo login successful",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        interviewCoin: user.interviewCoin,
+        isDemo: true,
+      },
+    });
+  } catch (error) {
+    console.error("Demo Login Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Demo login failed",
+    });
+  }
+};

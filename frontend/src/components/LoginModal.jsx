@@ -1,47 +1,45 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { FaXmark, FaShieldHalved } from "react-icons/fa6";
+import { FaXmark, FaShieldHalved, FaUserSecret } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { HiSparkles } from "react-icons/hi2";
 import { signInWithPopup } from "firebase/auth";
-import { useDispatch, useSelector } from "react-redux";
-import { auth, googleProvider }from "../../utils/firebase";
+import { useDispatch } from "react-redux";
+import { auth, googleProvider } from "../../utils/firebase";
 import api from "../../utils/axios";
 import { setUserData } from "../redux/userSlice";
 import { useNavigate } from "react-router-dom";
 
-
-
-const LoginModal = ({ isOpen, onClose,setUser }) => {
+const LoginModal = ({ isOpen, onClose, setUser }) => {
   const dispatch = useDispatch();
-  const navigate= useNavigate();
-
-    // const { userData } = useSelector((state) => state.user);
-    // console.log(userData,"UsaerDATA...")
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+  const [loginType, setLoginType] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async (token) => {
-    const { data } = await api.post("/api/auth/login", { token });
-
-    // Supports APIs returning either the user directly or { user, message }.
-    dispatch(setUserData(data.user ?? data));
-    setUser(data?.user)
-    navigate("/dashboard");
+  // Shared login success handler
+  const handleLoginSuccess = (user) => {
+    dispatch(setUserData(user));
+    setUser(user);
+    onClose();
+    navigate("/dashboard", { replace: true });
   };
 
+  // Google Login
   const googleLogin = async () => {
     try {
       setLoading(true);
+      setLoginType("google");
       setError("");
 
       const result = await signInWithPopup(auth, googleProvider);
       const token = await result.user.getIdToken();
 
-      await handleLogin(token);
-      onClose();
+      const { data } = await api.post("/api/auth/login", { token });
+
+      handleLoginSuccess(data.user ?? data);
     } catch (err) {
       console.error("Google login error:", err);
 
@@ -52,11 +50,40 @@ const LoginModal = ({ isOpen, onClose,setUser }) => {
       } else {
         setError(
           err.response?.data?.message ||
-            "Unable to sign in. Please try again.",
+            "Unable to sign in. Please try again."
         );
       }
     } finally {
       setLoading(false);
+      setLoginType("");
+    }
+  };
+
+  // Demo Login
+  const demoLogin = async () => {
+    try {
+      setLoading(true);
+      setLoginType("demo");
+      setError("");
+
+      const { data } = await api.post("/api/auth/demo-login", {});
+
+      if (!data.success) {
+        throw new Error(data.message || "Demo login failed.");
+      }
+
+      handleLoginSuccess(data.user);
+    } catch (err) {
+      console.error("Demo login error:", err);
+
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Unable to enter demo mode. Please try again."
+      );
+    } finally {
+      setLoading(false);
+      setLoginType("");
     }
   };
 
@@ -68,7 +95,7 @@ const LoginModal = ({ isOpen, onClose,setUser }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
+          onClick={loading ? undefined : onClose}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-md"
         >
           <motion.div
@@ -138,7 +165,7 @@ const LoginModal = ({ isOpen, onClose,setUser }) => {
                 disabled={loading}
                 className="group flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white px-5 py-3.5 text-sm font-semibold text-gray-900 transition duration-200 hover:bg-gray-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? (
+                {loading && loginType === "google" ? (
                   <>
                     <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-violet-600" />
                     Signing you in...
@@ -150,6 +177,40 @@ const LoginModal = ({ isOpen, onClose,setUser }) => {
                   </>
                 )}
               </button>
+
+              {/* Divider */}
+              <div className="my-5 flex w-full items-center gap-3">
+                <div className="h-px flex-1 bg-white/10" />
+                <span className="text-[11px] font-medium uppercase tracking-wider text-gray-500">
+                  Or
+                </span>
+                <div className="h-px flex-1 bg-white/10" />
+              </div>
+
+              {/* Demo login */}
+              <button
+                type="button"
+                onClick={demoLogin}
+                disabled={loading}
+                className="group flex w-full items-center justify-center gap-3 rounded-xl border border-violet-400/30 bg-gradient-to-r from-violet-500/15 to-blue-500/15 px-5 py-3.5 text-sm font-semibold text-violet-200 transition duration-300 hover:border-violet-400/60 hover:from-violet-500/25 hover:to-blue-500/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading && loginType === "demo" ? (
+                  <>
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-violet-300/30 border-t-violet-300" />
+                    Entering Demo...
+                  </>
+                ) : (
+                  <>
+                    <FaUserSecret className="text-lg transition-transform group-hover:scale-110" />
+                    Continue as Demo User
+                    <HiSparkles className="text-violet-300" />
+                  </>
+                )}
+              </button>
+
+              <p className="mt-3 text-xs text-gray-500">
+                Explore IntervexaAI without creating an account.
+              </p>
 
               {/* Error message */}
               {error && (
