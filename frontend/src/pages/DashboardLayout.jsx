@@ -1,10 +1,6 @@
-
 import { useEffect, useState } from "react";
-import {
-    Outlet,
-    useLocation,
-    useNavigate,
-} from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import { useDispatch, useSelector } from "react-redux";
 
@@ -12,157 +8,194 @@ import CreateInterviewModal from "../components/interview/CreateInterviewModal";
 import DashboardSidebar from "../components/dashboard/DashboardSidebar";
 import ResumeUploadModal from "../components/dashboard/ResumeUploadModal";
 
-import { uploadResume,fetchResume } from "../redux/resumeSlice";
+import { uploadResume, fetchResume } from "../redux/resumeSlice";
+import api from "../../utils/axios";
 
 const DashboardLayout = ({ user, setUser }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
 
-    const [isCreateInterviewOpen, setIsCreateInterviewOpen] =
-        useState(false);
+  const [isCreateInterviewOpen, setIsCreateInterviewOpen] = useState(false);
 
-    const [returnToCreateInterview, setReturnToCreateInterview] =
-        useState(false);
+  const [returnToCreateInterview, setReturnToCreateInterview] = useState(false);
 
-    const navigate = useNavigate();
-    const location = useLocation();
-    const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
 
-    const { isAnalyzing, resumeData } = useSelector(
-        (state) => state.resume
-    );
+  const { isAnalyzing, resumeData } = useSelector((state) => state.resume);
 
+  useEffect(() => {
+    dispatch(fetchResume());
+  }, [dispatch, user]);
+  // Open Create Interview Modal from landing page navigation.
+  useEffect(() => {
+    if (location.state?.openCreateInterview) {
+      setIsCreateInterviewOpen(true);
 
-        useEffect(() => {
-        dispatch(fetchResume());
-    }, [dispatch,user]);
-    // Open Create Interview Modal from landing page navigation.
-    useEffect(() => {
-        if (location.state?.openCreateInterview) {
-            setIsCreateInterviewOpen(true);
+      // Clear navigation state after opening the modal.
+      navigate(`${location.pathname}${location.search}${location.hash}`, {
+        replace: true,
+        state: null,
+      });
+    }
+  }, [
+    location.state,
+    location.pathname,
+    location.search,
+    location.hash,
+    navigate,
+  ]);
 
-            // Clear navigation state after opening the modal.
-            navigate(
-                `${location.pathname}${location.search}${location.hash}`,
-                {
-                    replace: true,
-                    state: null,
-                }
-            );
-        }
-    }, [location.state, location.pathname, location.search, location.hash, navigate]);
+  // Open resume upload from the sidebar.
+  const handleOpenResume = () => {
+    setReturnToCreateInterview(false);
+    setIsResumeModalOpen(true);
+  };
 
-    // Open resume upload from the sidebar.
-    const handleOpenResume = () => {
+  // Open resume upload from Create Interview.
+  const handleOpenResumeFromInterview = () => {
+    setIsCreateInterviewOpen(false);
+    setReturnToCreateInterview(true);
+    setIsResumeModalOpen(true);
+  };
+
+  // Analyze and save resume.
+  const handleResumeAnalyze = async (file) => {
+    try {
+      await dispatch(uploadResume(file)).unwrap();
+
+      setIsResumeModalOpen(false);
+
+      if (returnToCreateInterview) {
+        setIsCreateInterviewOpen(true);
         setReturnToCreateInterview(false);
-        setIsResumeModalOpen(true);
-    };
+      }
 
-    // Open resume upload from Create Interview.
-    const handleOpenResumeFromInterview = () => {
-        setIsCreateInterviewOpen(false);
-        setReturnToCreateInterview(true);
-        setIsResumeModalOpen(true);
-    };
+      return true;
+    } catch (error) {
+      console.error("Resume analysis failed:", error);
+      throw error;
+    }
+  };
 
-    // Analyze and save resume.
-    const handleResumeAnalyze = async (file) => {
-        try {
-            await dispatch(uploadResume(file)).unwrap();
+  // Close resume modal.
+  const handleCloseResumeModal = () => {
+    setIsResumeModalOpen(false);
+    setReturnToCreateInterview(false);
+  };
 
-            setIsResumeModalOpen(false);
+  // Handle successful interview creation.
+  const handleInterviewStarted = (result) => {
+    setIsCreateInterviewOpen(false);
 
-            if (returnToCreateInterview) {
-                setIsCreateInterviewOpen(true);
-                setReturnToCreateInterview(false);
-            }
+    navigate(`/interview/${result.interviewId}`);
+  };
 
-            return true;
-        } catch (error) {
-            console.error("Resume analysis failed:", error);
-            throw error;
-        }
-    };
+  // Handle Logout
 
-    // Close resume modal.
-    const handleCloseResumeModal = () => {
-        setIsResumeModalOpen(false);
-        setReturnToCreateInterview(false);
-    };
+  const handleLogout = async () => {
+    try {
+      // Call backend logout API
+      const { data } = await api.post(
+        "/api/auth/logout",
+        {},
+        { withCredentials: true },
+      );
 
-    // Handle successful interview creation.
-    const handleInterviewStarted = (result) => {
-        setIsCreateInterviewOpen(false);
+      if (!data.success) {
+        throw new Error(data.message || "Logout failed.");
+      }
 
-        navigate(`/interview/${result.interviewId}`);
-    };
+      // Clear authenticated user from frontend state
+      setUser(null);
 
-    const handleLogout = async () => {
-        // Keep your existing logout implementation here.
-    };
+      // Clear dashboard-related UI states
+      setIsSidebarOpen(false);
+      setIsCreateInterviewOpen(false);
+      setIsResumeModalOpen(false);
+      setReturnToCreateInterview(false);
 
-    return (
-        <div className="min-h-screen bg-[#F8F9FC]">
+      // Show success toast
+      toast.success("Logged out successfully! See you again.", {
+        duration: 3000,
+        position: "top-right",
+      });
+      navigate("/");
 
-            <DashboardSidebar
-                user={user}
-                isOpen={isSidebarOpen}
-                onClose={() => setIsSidebarOpen(false)}
-                onLogout={handleLogout}
-                onCreateInterview={() => {
-                    setIsCreateInterviewOpen(true);
-                }}
-                onOpenResumeModal={handleOpenResume}
-            />
+      return data;
+    } catch (error) {
+      console.error("Logout Error:", error.response?.data || error.message);
 
-            <main className="min-h-screen lg:ml-[250px]">
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to logout. Please try again.",
+      );
 
-                {/* Mobile Header */}
-                <header className="sticky top-0 z-20 flex h-[60px] items-center gap-3 border-b border-gray-100 bg-white/90 px-4 backdrop-blur-md lg:hidden">
-                    <button
-                        type="button"
-                        onClick={() => setIsSidebarOpen(true)}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700"
-                    >
-                        ☰
-                    </button>
+      throw error;
+    }
+  };
 
-                    <span className="text-base font-extrabold text-gray-950">
-                        Intervexa
-                        <span className="text-violet-600">AI</span>
-                    </span>
-                </header>
+  return (
+    <div className="min-h-screen bg-[#F8F9FC]">
+      <DashboardSidebar
+        user={user}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        onLogout={handleLogout}
+        onCreateInterview={() => {
+          setIsCreateInterviewOpen(true);
+        }}
+        onOpenResumeModal={handleOpenResume}
+      />
 
-                {/* Nested Dashboard Pages */}
-                <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-                    <Outlet
-                        context={{
-                            onReupload: handleOpenResume,
-                        }}
-                    />
-                </div>
-            </main>
+      <main className="min-h-screen lg:ml-[250px]">
+        {/* Mobile Header */}
+        <header className="sticky top-0 z-20 flex h-[60px] items-center gap-3 border-b border-gray-100 bg-white/90 px-4 backdrop-blur-md lg:hidden">
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700"
+          >
+            ☰
+          </button>
 
-            {/* Resume Upload Modal */}
-            <ResumeUploadModal
-                isOpen={isResumeModalOpen}
-                onClose={handleCloseResumeModal}
-                onAnalyze={handleResumeAnalyze}
-                isAnalyzing={isAnalyzing}
-            />
+          <span className="text-base font-extrabold text-gray-950">
+            Intervexa
+            <span className="text-violet-600">AI</span>
+          </span>
+        </header>
 
-            {/* Create Interview Modal */}
-            <CreateInterviewModal
-                isOpen={isCreateInterviewOpen}
-                onClose={() => setIsCreateInterviewOpen(false)}
-                user={user}
-                resume={resumeData}
-                onOpenResumeModal={handleOpenResumeFromInterview}
-                onInterviewStarted={handleInterviewStarted}
-            />
-
+        {/* Nested Dashboard Pages */}
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <Outlet
+            context={{
+              onReupload: handleOpenResume,
+            }}
+          />
         </div>
-    );
+      </main>
+
+      {/* Resume Upload Modal */}
+      <ResumeUploadModal
+        isOpen={isResumeModalOpen}
+        onClose={handleCloseResumeModal}
+        onAnalyze={handleResumeAnalyze}
+        isAnalyzing={isAnalyzing}
+      />
+
+      {/* Create Interview Modal */}
+      <CreateInterviewModal
+        isOpen={isCreateInterviewOpen}
+        onClose={() => setIsCreateInterviewOpen(false)}
+        user={user}
+        resume={resumeData}
+        onOpenResumeModal={handleOpenResumeFromInterview}
+        onInterviewStarted={handleInterviewStarted}
+      />
+    </div>
+  );
 };
 
 export default DashboardLayout;

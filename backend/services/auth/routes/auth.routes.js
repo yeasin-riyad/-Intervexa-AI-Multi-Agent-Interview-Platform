@@ -5,7 +5,7 @@ const authRouter=express.Router();
 
 
 authRouter.post("/login",googleAuth);
-authRouter.get("/logout",logout);
+authRouter.post("/logout",logout);
 authRouter.post("/use-coins",useCoins);
 
 export default authRouter;

@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -10,6 +11,8 @@ import {
   HiOutlineSquares2X2,
   HiOutlineCurrencyDollar,
   HiOutlineChevronRight,
+  HiOutlineExclamationTriangle,
+  HiOutlineArrowRightOnRectangle,
 } from "react-icons/hi2";
 
 import { dashboardAgents, demoUser } from "../../data/dashboardData";
@@ -17,6 +20,7 @@ import { dashboardAgents, demoUser } from "../../data/dashboardData";
 import UserProfile from "./UserProfile";
 
 import { fetchResume } from "../../redux/resumeSlice";
+import toast from "react-hot-toast";
 
 const DashboardSidebar = ({
   user,
@@ -29,6 +33,11 @@ const DashboardSidebar = ({
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Logout modal states
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
 
   // Navigation items
   const navigation = [
@@ -119,6 +128,64 @@ const DashboardSidebar = ({
     user?.interviewCoin ??
     demoUser.interviewCoins;
 
+  // Open logout confirmation modal
+  const handleLogoutRequest = () => {
+    setLogoutError("");
+    setIsLogoutModalOpen(true);
+  };
+
+  // Close logout confirmation modal
+  const handleCancelLogout = () => {
+    if (isLoggingOut) return;
+
+    setIsLogoutModalOpen(false);
+    setLogoutError("");
+  };
+
+  // Confirm logout
+
+const handleConfirmLogout = async () => {
+  if (isLoggingOut) return;
+
+  try {
+    setIsLoggingOut(true);
+    setLogoutError("");
+
+    if (typeof onLogout !== "function") {
+      throw new Error("Logout function is not configured.");
+    }
+
+    // Call backend logout through DashboardLayout
+    await onLogout();
+
+    // Close sidebar and confirmation modal
+    onClose?.();
+    setIsLogoutModalOpen(false);
+
+    // Show success toast
+    toast.success("Logged out successfully! See you again.", {
+      duration: 3000,
+      position: "top-right",
+    });
+
+    // Navigate to login page
+    navigate("/", { replace: true });
+
+  } catch (error) {
+    console.error("Logout failed:", error);
+
+    const message =
+      error?.message || "Something went wrong. Please try again.";
+
+    setLogoutError(message);
+    toast.error(message);
+
+  } finally {
+    setIsLoggingOut(false);
+  }
+};
+
+
   // Sidebar UI
   const sidebarContent = (
     <div className="flex h-full min-h-0 flex-col bg-white">
@@ -174,10 +241,6 @@ const DashboardSidebar = ({
 
           {navigation.map((item) => {
             const Icon = item.icon;
-
-            const isResume =
-              item.label === "Resume Scorer" ||
-              item.path === "/resume";
 
             const isActive = isActiveRoute(item.path);
 
@@ -274,7 +337,7 @@ const DashboardSidebar = ({
       <div className="shrink-0 border-t border-gray-100">
         <UserProfile
           user={user}
-          onLogout={onLogout}
+          onLogout={handleLogoutRequest}
         />
       </div>
 
@@ -283,6 +346,90 @@ const DashboardSidebar = ({
 
   return (
     <>
+      {/* Logout Confirmation Modal */}
+<AnimatePresence>
+  {isLogoutModalOpen && (
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={handleCancelLogout}
+    >
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-modal-title"
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 15 }}
+        transition={{ duration: 0.2 }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-[400px] rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl"
+      >
+        {/* Icon */}
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+          <HiOutlineArrowRightOnRectangle className="text-3xl" />
+        </div>
+
+        {/* Content */}
+        <div className="mt-5 text-center">
+          <h3
+            id="logout-modal-title"
+            className="text-xl font-bold text-slate-900"
+          >
+            Ready to leave?
+          </h3>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Are you sure you want to log out of your IntervexaAI account?
+            You'll need to sign in again to continue.
+          </p>
+        </div>
+
+        {/* Error Message */}
+        {logoutError && (
+          <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 p-3 text-left text-xs text-red-600">
+            <HiOutlineExclamationTriangle className="mt-0.5 shrink-0 text-base" />
+            <span>{logoutError}</span>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="mt-6 flex gap-3">
+          <button
+            type="button"
+            onClick={handleCancelLogout}
+            disabled={isLoggingOut}
+            className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            onClick={handleConfirmLogout}
+            disabled={isLoggingOut}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-500/20 transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isLoggingOut ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                Logging out...
+              </>
+            ) : (
+              <>
+                <HiOutlineArrowRightOnRectangle className="text-base" />
+                Yes, Log Out
+              </>
+            )}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
       {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[250px] border-r border-gray-100 bg-white lg:block">
         {sidebarContent}

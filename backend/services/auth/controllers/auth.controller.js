@@ -58,7 +58,6 @@ export const googleAuth = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: SESSION_TTL * 1000,
-      path: "/",
     });
 
     return res.status(200).json({
@@ -89,7 +88,6 @@ export const logout = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      path: "/",
     });
 
     return res.status(200).json({

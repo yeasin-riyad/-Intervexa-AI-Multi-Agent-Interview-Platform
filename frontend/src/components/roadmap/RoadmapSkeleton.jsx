@@ -5,7 +5,7 @@ const RoadmapSkeleton = () => {
       {[1, 2, 3].map((item) => (
         <div
           key={item}
-          className="animate-pulse rounded-2xl border border-white/10 bg-[#151827] p-5"
+          className="animate-pulse rounded-2xl border border-white/10 bg-indigo-50 p-5"
         >
           <div className="mb-5 flex justify-between">
             <div className="h-12 w-12 rounded-xl bg-white/10" />

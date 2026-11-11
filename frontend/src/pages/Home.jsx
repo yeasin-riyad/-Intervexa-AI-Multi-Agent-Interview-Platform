@@ -4,6 +4,7 @@ import LoginModal from "../components/LoginModal";
 import HeroSection from "../components/HeroSection";
 import FeaturesSection from "../components/FeaturesSection";
 import { useNavigate } from "react-router-dom";
+import Footer from "../components/Footer";
 
 const Home = ({ setUser }) => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -25,6 +26,7 @@ const Home = ({ setUser }) => {
        />
 
       <FeaturesSection />
+      <Footer/>
 
       <LoginModal
         isOpen={isLoginOpen}

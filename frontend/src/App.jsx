@@ -12,6 +12,7 @@ import InterviewReport from "./pages/InterviewReport";
 
 import { getCurrentUser } from "../utils/getMe";
 import Roadmap from "./pages/Roadmap";
+import RoadmapDetails from "./pages/RoadmapDetails";
 
 // Protected Route
 const ProtectedRoute = ({ user, children }) => {
@@ -101,6 +102,8 @@ const App = () => {
                     path="/roadmap"
                     element={<Roadmap />}
                 />
+
+                 <Route path="/roadmap/:id" element={<RoadmapDetails />} />
             </Route>
 
             {/* Protected Interview Routes (outside DashboardLayout) */}

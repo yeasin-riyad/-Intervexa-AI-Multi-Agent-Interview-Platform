@@ -9,14 +9,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { auth, googleProvider }from "../../utils/firebase";
 import api from "../../utils/axios";
 import { setUserData } from "../redux/userSlice";
+import { useNavigate } from "react-router-dom";
 
 
 
 const LoginModal = ({ isOpen, onClose,setUser }) => {
   const dispatch = useDispatch();
+  const navigate= useNavigate();
 
-    const { userData } = useSelector((state) => state.user);
-    console.log(userData,"UsaerDATA...")
+    // const { userData } = useSelector((state) => state.user);
+    // console.log(userData,"UsaerDATA...")
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -27,6 +29,7 @@ const LoginModal = ({ isOpen, onClose,setUser }) => {
     // Supports APIs returning either the user directly or { user, message }.
     dispatch(setUserData(data.user ?? data));
     setUser(data?.user)
+    navigate("/dashboard");
   };
 
   const googleLogin = async () => {
