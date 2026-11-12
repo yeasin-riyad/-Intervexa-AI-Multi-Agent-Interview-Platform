@@ -7,6 +7,7 @@ import {
   HiOutlineTrash,
   HiOutlineSparkles,
 } from "react-icons/hi2";
+import { useNavigate } from "react-router-dom";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
@@ -21,6 +22,7 @@ const ResumeUploadModal = ({
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState("");
+  const navigate= useNavigate();
 
   useEffect(() => {
     if (!isOpen) {
@@ -78,6 +80,7 @@ const ResumeUploadModal = ({
 
     try {
       setError("");
+      navigate("/resume");
       await onAnalyze?.(file);
     } catch (err) {
       setError(
