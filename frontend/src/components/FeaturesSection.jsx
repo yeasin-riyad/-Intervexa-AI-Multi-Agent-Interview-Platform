@@ -1,4 +1,3 @@
-
 import { motion } from "motion/react";
 
 import {
@@ -102,15 +101,13 @@ const FeaturesSection = () => {
         <div
           className="absolute inset-0 opacity-[0.025]"
           style={{
-            backgroundImage:
-              "radial-gradient(#64748b 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(#64748b 1px, transparent 1px)",
             backgroundSize: "25px 25px",
           }}
         />
       </div>
 
       <div className="mx-auto max-w-7xl">
-
         {/* Section Heading */}
         <motion.div
           initial={{ opacity: 0, y: 25 }}
@@ -252,8 +249,8 @@ const FeaturesSection = () => {
               </h3>
 
               <p className="mt-2 max-w-xl text-xs leading-6 text-white/65 sm:text-sm">
-                Start practicing with your AI career team and take the next
-                step toward your dream job.
+                Start practicing with your AI career team and take the next step
+                toward your dream job.
               </p>
             </div>
 
@@ -263,18 +260,17 @@ const FeaturesSection = () => {
               whileTap={{ scale: 0.97 }}
               className="group inline-flex shrink-0 items-center gap-3 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-indigo-700 shadow-lg transition hover:bg-violet-50"
               onClick={() => {
-                document
-                  .querySelector("#hero")
-                  ?.scrollIntoView({ behavior: "smooth" });
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                });
               }}
             >
               Explore IntervexaAI
-
               <FaArrowRight className="text-xs transition-transform group-hover:translate-x-1" />
             </motion.button>
           </div>
         </motion.div>
-
       </div>
     </section>
   );
