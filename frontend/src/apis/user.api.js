@@ -2,7 +2,7 @@ import api from "../../utils/axios.js"
 
 export const currentUser= async()=>{
     try {
-        const response= await api.get("/api/me");
+        const response= await api.get("/api/auth/me");
         return response.data;
         
     } catch (error) {
